@@ -8,6 +8,7 @@ check:
 createUser:
 	curl -i -X POST 'http://localhost:1323/users' \
 	-H 'Content-Type: application/json' \
+	-H 'x-api-key: enjoy' \
 	-d '{"name": "Dan","email": "dan@text.com"}'
 
 getUser:

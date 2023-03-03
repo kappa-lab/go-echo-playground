@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -14,12 +15,27 @@ func main() {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
+	//e.Use(middleware.Logger())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "method=${method}, uri=${uri}, status=${status}\n",
+	}))
+
+	e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+		Skipper: func(c echo.Context) bool {
+			log.Println("skipper")
+			return c.Request().Method != "POST"
+		},
+		KeyLookup: "header:x-api-key",
+		Validator: func(key string, c echo.Context) (bool, error) {
+			log.Println("validator")
+			return key == "enjoy", nil
+		},
+	}))
+
 	e.POST("/users", createUser)
 	e.GET("/users/:id", getUser)
 	e.PUT("/users/:id", updateUser)
 	e.DELETE("/users/:id", deleteUser)
-
-	e.Use(middleware.Logger())
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
@@ -31,6 +47,7 @@ type User struct {
 }
 
 func createUser(c echo.Context) error {
+	log.Println("createUser")
 	u := &User{}
 	if err := c.Bind(u); err != nil {
 		return err
