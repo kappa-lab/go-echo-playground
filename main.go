@@ -10,6 +10,11 @@ import (
 )
 
 func main() {
+	e := createEcho()
+	e.Logger.Fatal(e.Start(":1323"))
+}
+
+func createEcho() *echo.Echo {
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
@@ -37,7 +42,7 @@ func main() {
 	e.PUT("/users/:id", updateUser)
 	e.DELETE("/users/:id", deleteUser)
 
-	e.Logger.Fatal(e.Start(":1323"))
+	return e
 }
 
 type User struct {

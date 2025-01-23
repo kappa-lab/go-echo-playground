@@ -1,5 +1,5 @@
 run:
-	go run main.go
+	go run ./...
 
 check:
 	curl http://localhost:1323 	
