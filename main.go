@@ -5,34 +5,42 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/kappa-lab/go-echo-playground/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.uber.org/zap"
 )
 
 func main() {
 	e := createEcho()
 	e.Logger.Fatal(e.Start(":1323"))
 }
-
 func createEcho() *echo.Echo {
+	zapConf := zap.NewDevelopmentConfig()
+	zapConf.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+	zap, err := zapConf.Build(
+		zap.AddStacktrace(zap.ErrorLevel),
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	//e.Use(middleware.Logger())
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "method=${method}, uri=${uri}, status=${status}\n",
-	}))
+	e.Use(logger.LoggerMiddleware(zap))
 
 	e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		Skipper: func(c echo.Context) bool {
-			log.Println("skipper")
+			logger.FromContext(c.Request().Context()).Debug("skipper")
 			return c.Request().Method != "POST"
 		},
 		KeyLookup: "header:x-api-key",
 		Validator: func(key string, c echo.Context) (bool, error) {
-			log.Println("validator")
+			logger.FromContext(c.Request().Context()).Debug("validator")
 			return key == "enjoy", nil
 		},
 	}))
@@ -52,7 +60,7 @@ type User struct {
 }
 
 func createUser(c echo.Context) error {
-	log.Println("createUser")
+	logger.FromContext(c.Request().Context()).Debug("createUser")
 	u := &User{}
 	if err := c.Bind(u); err != nil {
 		return err

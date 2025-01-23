@@ -27,17 +27,23 @@ func FromContext(ctx context.Context) *zap.Logger {
 func LoggerMiddleware(l *zap.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// Set Logger
 			ctx := c.Request().Context()
 			ctx = WithContext(ctx, l)
 			c.SetRequest(c.Request().WithContext(ctx))
 
 			err := next(c)
+
+			tl := FromContext(c.Request().Context()).
+				With(zap.String("method", c.Request().Method)).
+				With(zap.String("path", c.Request().RequestURI)).
+				With(zap.Int("status", c.Response().Status))
+
 			if err != nil {
 				c.Error(err)
+				tl.WithOptions(zap.AddCallerSkip(1)).Error("NG")
 			}
 
-			FromContext(c.Request().Context()).Info("info")
+			tl.Info("OK")
 
 			return nil
 		}
