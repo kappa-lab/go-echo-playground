@@ -3,12 +3,16 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/kappa-lab/go-echo-playground/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+
+	"github.com/cockroachdb/errors"
 )
 
 func main() {
@@ -17,11 +21,11 @@ func main() {
 }
 func createEcho() *echo.Echo {
 	zapConf := zap.NewDevelopmentConfig()
-	zapConf.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+	zapConf.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(time.TimeOnly)
+	zapConf.EncoderConfig.ConsoleSeparator = " " //から文字を入れると、Tabになる？
 	zap, err := zapConf.Build(
-		zap.AddStacktrace(zap.ErrorLevel),
+		zap.AddStacktrace(zap.ErrorLevel), //スタックトレースなしのエラーのために設定しておく（デフォルトのまま）
 	)
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -31,6 +35,7 @@ func createEcho() *echo.Echo {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
+	e.Use(middleware.RequestID())
 	e.Use(logger.LoggerMiddleware(zap))
 
 	e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
@@ -85,10 +90,30 @@ func updateUser(c echo.Context) error {
 	if err := c.Bind(u); err != nil {
 		return err
 	}
+
+	logger.FromContext(c.Request().Context()).Debug("updateUser", zap.Any("param", u))
+
+	if id == "9999" {
+		return Repo{}.Get()
+	}
+
 	u.ID = id
 	return c.JSON(http.StatusOK, u)
 }
 
 func deleteUser(c echo.Context) error {
 	return c.String(http.StatusNoContent, "ok")
+}
+
+type Repo struct {
+}
+
+func (r Repo) Get() error {
+	return errors.WithStack(MyError{})
+}
+
+type MyError struct{}
+
+func (e MyError) Error() string {
+	return "REPO ERROR"
 }

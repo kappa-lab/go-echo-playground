@@ -1,7 +1,10 @@
 package logger
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"io"
 
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
@@ -31,19 +34,29 @@ func LoggerMiddleware(l *zap.Logger) echo.MiddlewareFunc {
 			ctx = WithContext(ctx, l)
 			c.SetRequest(c.Request().WithContext(ctx))
 
+			var dump bytes.Buffer
+			tr := io.TeeReader(c.Request().Body, &dump)
+			c.Request().Body = io.NopCloser(tr)
+
 			err := next(c)
 
 			tl := FromContext(c.Request().Context()).
 				With(zap.String("method", c.Request().Method)).
 				With(zap.String("path", c.Request().RequestURI)).
-				With(zap.Int("status", c.Response().Status))
+				With(zap.String("requestID", c.Response().Header().Get(echo.HeaderXRequestID)))
 
 			if err != nil {
 				c.Error(err)
-				tl.WithOptions(zap.AddCallerSkip(1)).Error("NG")
-			}
 
-			tl.Info("OK")
+				tl.
+					With(zap.String("requestBody", dump.String())).
+					With(zap.Int("status", c.Response().Status)).
+					Error(fmt.Sprintf("%+v", err))
+			} else {
+				tl.
+					With(zap.Int("status", c.Response().Status)).
+					Info("OK")
+			}
 
 			return nil
 		}
