@@ -19,5 +19,11 @@ updateUser:
 	-H 'Content-Type: application/json' \
 	-d '{"name": "ko","email": "ko@text.com"}'
 
+updateUser/fail:
+	curl -i -X PUT 'http://localhost:1323/users/9999' \
+	-H 'Content-Type: application/json' \
+	-d '{"name": "ko","email": "ko@text.com"}'
+
+
 deleteUser:
 	curl -i -X DELETE http://localhost:1323/users/1		
