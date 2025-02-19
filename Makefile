@@ -1,5 +1,7 @@
 run:
-	go run ./...
+	go run ./main.go
+run/frontend:
+	go run ./frontend/main.go
 
 check:
 	curl http://localhost:1323 	

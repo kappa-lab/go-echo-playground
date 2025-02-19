@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <title>My App</title>
+    </head>
+    <body>
+        <h1>Welcome to My App</h1>
+        <p>SEE CONSOLE</p>
+        <script>
+            fetch('http://localhost:1323/users/1')
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => console.error('Error:', error));
+        </script>
+    </body>
+</html>
