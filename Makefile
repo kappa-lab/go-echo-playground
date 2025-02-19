@@ -1,5 +1,7 @@
 run:
-	go run ./...
+	go run ./main.go
+run/frontend:
+	go run ./frontend/main.go
 
 check:
 	curl http://localhost:1323 	
@@ -12,7 +14,7 @@ createUser:
 	-d '{"name": "Dan","email": "dan@text.com"}'
 
 getUser:
-	curl -i http://localhost:1323/users/1
+	curl -i --include http://localhost:1323/users/1
 
 updateUser:
 	curl -i -X PUT 'http://localhost:1323/users/1' \

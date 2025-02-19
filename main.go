@@ -38,6 +38,12 @@ func createEcho() *echo.Echo {
 	e.Use(middleware.RequestID())
 	e.Use(logger.LoggerMiddleware(zap))
 
+	e.Use(middleware.CORSWithConfig(
+		middleware.CORSConfig{
+			AllowOrigins: []string{"http://localhost:3000"},
+			AllowMethods: []string{http.MethodGet, http.MethodHead, http.MethodPut, http.MethodPatch, http.MethodPost, http.MethodDelete},
+		}))
+
 	e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		Skipper: func(c echo.Context) bool {
 			logger.FromContext(c.Request().Context()).Debug("skipper")
