@@ -10,8 +10,13 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
+                    document.getElementById('result').textContent = JSON.stringify(data);
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error:', error)
+                    document.getElementById('result').textContent = JSON.stringify(error);
+                });
         </script>
+        <p id="result">...</p>
     </body>
 </html>

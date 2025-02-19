@@ -9,6 +9,8 @@ import (
 func main() {
 	http.HandleFunc("/", indexPage)
 
+	// 3000ポートしかCORSで許可していない
+	// 3000ポート以外で起動するとCORSエラーになる
 	err := http.ListenAndServe(":3000", nil)
 	if err != nil {
 		log.Fatal(err)
