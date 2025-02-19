@@ -25,6 +25,8 @@ func createEcho() *echo.Echo {
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
 
+	e.Use(middleware.CORS())
+
 	e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		Skipper: func(c echo.Context) bool {
 			log.Println("skipper")
