@@ -10,13 +10,31 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
-                    document.getElementById('result').textContent = JSON.stringify(data);
+                    document.getElementById('result0').textContent = JSON.stringify(data);
                 })
                 .catch(error => {
                     console.error('Error:', error)
-                    document.getElementById('result').textContent = JSON.stringify(error);
+                    document.getElementById('result0').textContent = JSON.stringify(error);
+                });
+
+                fetch('http://localhost:1323/users/1', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({"name": "ko","email": "ko@text.com"})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    document.getElementById('result1').textContent = JSON.stringify(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('result1').textContent = JSON.stringify(error);
                 });
         </script>
-        <p id="result">...</p>
+        <p id="result0">...</p>
+        <p id="result1">...</p>
     </body>
 </html>
